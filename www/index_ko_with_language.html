@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4223832436548060"
+     crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일본여행지도 | 도시별 여행 사진과 영상</title>
+<meta name="description" content="삿포로, 도쿄, 오사카, 후쿠오카 등 일본 주요 도시의 위치와 여행 사진·영상을 지도에서 확인하고 여행지를 살펴보세요.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="일본여행지도 | 도시별 여행 사진과 영상">
+<meta property="og:description" content="일본 주요 도시의 위치와 여행 사진·영상을 한눈에 살펴보는 여행 지도입니다.">
+<style>
+* {box-sizing: border-box;margin: 0;padding: 0;}
+body {background: #0f172a;color: #ffffff;min-height: 100vh;padding: 30px;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+.container {width: 100%;max-width: 1000px;margin: 0 auto;}
+/* =========================일본 지도========================= */
+.map-wrapper {position: relative;width: 100%;aspect-ratio: 16 / 9;border-radius: 16px;overflow: hidden;background: #1e293b;border: 3px solid #d97706;box-shadow: 0 20px 25px -5px rgba(0,0,0,.6);user-select: none;}
+.map-image {position: absolute;inset: 0;width: 100%;height: 100%;object-fit: cover;display: block;z-index: 1;}
+/* =========================마커========================= */
+.spot {position: absolute;transform: translate(-50%, -50%);z-index: 10;cursor: pointer;touch-action: none;}
+.dot {position: relative;width: 13px;height: 13px;border-radius: 50%;background: var(--spot-color);border: 2px solid #fff;box-shadow: 0 0 9px var(--spot-color);z-index: 3;transition: transform .15s ease;}
+.spot:hover .dot {transform: scale(1.4);}
+.pulse {position: absolute;left: 50%;top: 50%;width: 13px;height: 13px;transform: translate(-50%, -50%);border-radius: 50%;background: var(--spot-color);animation: blink 1.6s infinite ease-out;z-index: 2;pointer-events: none;}
+@keyframes blink {0% {width: 13px;height: 13px;opacity: .95;}
+100% {width: 42px;height: 42px;opacity: 0;}}
+.custom-label {position: absolute;top: 19px;left: 50%;transform: translateX(-50%);white-space: nowrap;background: #fff;color: #1e1b4b;padding: 2px 7px;border-radius: 10px;border: 1.5px solid #1e1b4b;box-shadow: 1.5px 1.5px 0 #1e1b4b;font-size: 11px;font-weight: 800;pointer-events: none;}
+/* =========================범례========================= */
+.legend {margin-top: 15px;display: grid;grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));gap: 10px;padding: 15px;background: #1e293b;border: 1px solid #334155;border-radius: 12px;}
+.legend-item {display: flex;align-items: center;gap: 8px;padding: 6px;border-radius: 8px;cursor: pointer;font-size: 13px;font-weight: 800;transition: background .15s;}
+.legend-item:hover {background: #334155;}
+.legend-color {width: 12px;height: 12px;flex: 0 0 auto;border-radius: 50%;background: var(--spot-color);border: 1px solid #fff;}
+/* =========================도시 팝업========================= */
+.modal-overlay {position: fixed;inset: 0;z-index: 1000;
+display: flex;align-items: center;justify-content: center;
+padding: 15px;
+background: rgba(0,0,0,.72);backdrop-filter: blur(4px);
+opacity: 0;visibility: hidden;transition:opacity .25s ease,visibility .25s ease;}
+.modal-overlay.active {opacity: 1;visibility: visible;}
+.modal-card {position: relative;width: 90%;max-width: 800px;
+overflow: hidden;
+background: #1e293b;border: 1px solid #475569;border-radius: 16px;
+box-shadow: 0 25px 50px -12px rgba(0,0,0,.8);
+transform: translateY(20px);transition: transform .25s ease;}
+.modal-overlay.active .modal-card {transform: translateY(0);}
+.modal-close {position: absolute;top: 12px;right: 12px;z-index: 30;
+width: 34px;height: 34px;
+border: none;border-radius: 50%;
+background: rgba(0,0,0,.55);color: #fff;
+font-size: 20px;cursor: pointer;
+display: flex;align-items: center;justify-content: center;}
+.modal-close:hover {background: rgba(0,0,0,.85);}
+/* =========================미디어========================= */
+.modal-media-container {position: relative;
+width: 100%;height: 500px;
+background: #000;
+display: flex;align-items: center;justify-content: center;
+overflow: hidden;}
+.modal-img,.modal-video {width: 100%;height: 100%;object-fit: contain;display: block;}
+.modal-img {cursor: zoom-in;}
+.modal-video {cursor: pointer;}
+/* =========================미디어 오류========================= */
+.media-error {display: none;
+width: 100%;padding: 30px;
+color: #fff;text-align: center;line-height: 1.7;font-size: 14px;}
+.media-error strong {display: block;color: #fbbf24;margin-bottom: 10px;}
+#mediaErrorText {display: block;word-break: break-all;color: #cbd5e1;}
+/* =========================슬라이드 버튼========================= */
+.slide-btn {position: absolute;top: 50%;z-index: 20;
+transform: translateY(-50%);
+width: 44px;height: 44px;
+border: none;border-radius: 50%;
+background: rgba(0,0,0,.45);color: #fff;
+font-size: 22px;cursor: pointer;
+display: flex;align-items: center;justify-content: center;}
+.slide-btn:hover {background: rgba(0,0,0,.8);}
+.slide-btn.prev {left: 10px;}
+.slide-btn.next {right: 10px;}
+.slide-counter {position: absolute;right: 10px;bottom: 10px;z-index: 20;
+padding: 4px 9px;
+background: rgba(0,0,0,.65);border-radius: 12px;
+font-size: 11px;}
+/* =========================설명========================= */
+.modal-content {padding: 20px;}
+.modal-title {display: flex;align-items: center;gap: 8px;
+margin-bottom: 8px;
+font-size: 20px;font-weight: 700;}
+.modal-title-dot {width: 10px;height: 10px;border-radius: 50%;display: inline-block;}
+.modal-desc {margin-bottom: 16px;
+color: #cbd5e1;
+font-size: 14px;line-height: 1.6;}
+.modal-tags {display: flex;flex-wrap: wrap;gap: 6px;}
+.modal-tag {padding: 4px 10px;
+background: #334155;border: 1px solid #475569;border-radius: 20px;
+color: #94a3b8;font-size: 12px;}
+/* =========================전체화면========================= */
+.fullscreen-modal {position: fixed;inset: 0;z-index: 2000;
+display: flex;align-items: center;justify-content: center;
+padding: 20px;
+background: rgba(0,0,0,.94);backdrop-filter: blur(8px);
+opacity: 0;visibility: hidden;
+transition:opacity .25s ease,visibility .25s ease;}
+.fullscreen-modal.active {opacity: 1;visibility: visible;}
+.fullscreen-content {max-width: 95vw;max-height: 95vh;
+width: auto;height: auto;
+object-fit: contain;
+border-radius: 8px;
+box-shadow: 0 0 30px rgba(0,0,0,.8);}
+.fullscreen-close {position: absolute;top: 20px;right: 25px;z-index: 2010;
+width: 44px;height: 44px;
+border: none;border-radius: 50%;
+background: rgba(255,255,255,.2);color: #fff;
+font-size: 28px;cursor: pointer;}
+/* =========================모바일========================= */
+@media (max-width: 700px) {
+body {padding: 10px;}
+.map-wrapper {border-width: 2px;border-radius: 12px;}
+.legend {grid-template-columns: repeat(2, 1fr);gap: 6px;padding: 10px;}
+.legend-item {font-size: 12px;}
+.modal-overlay {padding: 8px;}
+.modal-card {width: 100%;border-radius: 12px;}
+.modal-media-container {height: 350px;}
+.modal-content {padding: 15px;}
+.modal-title {font-size: 18px;}
+.modal-desc {font-size: 13px;}
+.slide-btn {width: 38px;height: 38px;}
+.fullscreen-content {max-width: 100vw;max-height: 90vh;}}
+
+/* =========================여행 안내 및 사이트 정보========================= */
+.travel-info {margin-top: 28px;padding: 24px;background: #1e293b;border: 1px solid #334155;border-radius: 14px;line-height: 1.8;color: #e2e8f0;}
+.travel-info h1 {font-size: 24px;color: #fff;margin-bottom: 12px;}
+.travel-info h2 {font-size: 18px;color: #fbbf24;margin: 22px 0 7px;}
+.travel-info p {font-size: 14px;color: #cbd5e1;margin-bottom: 8px;}
+.travel-info ul {padding-left: 20px;color: #cbd5e1;font-size: 14px;}
+.site-footer {margin: 22px auto 0;padding: 18px 10px;text-align: center;color: #94a3b8;font-size: 12px;line-height: 1.8;}
+.site-footer a {color: #cbd5e1;text-decoration: underline;margin: 0 8px;}
+.privacy-note {margin-top: 24px;padding-top: 18px;border-top: 1px solid #475569;}
+@media (max-width:700px) {.travel-info {padding: 18px;margin-top: 20px;}.travel-info h1 {font-size: 20px;}.travel-info h2 {font-size: 16px;}}
+
+/* =========================언어 전환========================= */
+.language-switch {width:100%;max-width:1000px;margin:0 auto 14px;display:flex;justify-content:flex-end;gap:6px;}
+.language-switch a {display:inline-block;padding:7px 13px;border:1px solid #475569;border-radius:20px;color:#cbd5e1;text-decoration:none;font-size:13px;font-weight:700;background:#1e293b;transition:all .15s ease;}
+.language-switch a:hover {background:#334155;color:#fff;}
+.language-switch a.active {background:#d97706;border-color:#d97706;color:#fff;}
+@media (max-width:700px) {.language-switch {margin-bottom:10px;padding-right:2px;}}
+</style>
+</head>
+<body>
+<div class="language-switch" aria-label="Language selection">
+<a href="./index.html" class="active" aria-current="page">한국어</a>
+<a href="./index_en.html">English</a>
+</div>
+<div class="container">
+<div class="map-wrapper" id="mapWrapper">
+<img class="map-image" src="./images/japan_map.jpg" alt="일본여행지도">
+<div class="spot" data-name="삿포로" style="left:80.5%; top:20.8%; --spot-color:#FF2D55;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="도쿄" style="left:74.3%; top:62.1%; --spot-color:#FF9500;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="시즈오카" style="left:71.2%; top:64.2%; --spot-color:#FFCC00;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="오사카" style="left:61.8%; top:66.7%; --spot-color:#34C759;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="고베" style="left:60.3%; top:65.1%; --spot-color:#00C7BE;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="후쿠오카" style="left:47.5%; top:69.1%; --spot-color:#32ADE6;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="사가" style="left:45.6%; top:69.7%; --spot-color:#30B0C7;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="유후인" style="left:49%; top:72.3%; --spot-color:#007AFF;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="나가사키" style="left:44%; top:73.2%; --spot-color:#5856D6;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="구마모토" style="left:47.5%; top:75.3%; --spot-color:#AF52DE;"><div class="dot"></div><div class="pulse"></div><div class="custom-label">구마모토</div></div>
+<div class="spot" data-name="가고시마" style="left:45.3%; top:79.3%; --spot-color:#FF2D55;"><div class="dot"></div><div class="pulse"></div></div>
+<div class="spot" data-name="미야코지마" style="left:13.1%; top:87.4%; --spot-color:#A2845E;"><div class="dot"></div><div class="pulse"></div></div>
+</div>
+
+<div class="legend">
+<div class="legend-item" onclick="openModalByName('삿포로')" style="--spot-color:#FF2D55;"><div class="legend-color"></div>삿포로</div>
+<div class="legend-item" onclick="openModalByName('도쿄')" style="--spot-color:#FF9500;"><div class="legend-color"></div>도쿄</div>
+<div class="legend-item" onclick="openModalByName('시즈오카')" style="--spot-color:#FFCC00;"><div class="legend-color"></div>시즈오카</div>
+<div class="legend-item" onclick="openModalByName('오사카')" style="--spot-color:#34C759;"><div class="legend-color"></div>오사카</div>
+<div class="legend-item" onclick="openModalByName('고베')" style="--spot-color:#00C7BE;"><div class="legend-color"></div>고베</div>
+<div class="legend-item" onclick="openModalByName('후쿠오카')" style="--spot-color:#32ADE6;"><div class="legend-color"></div>후쿠오카</div>
+<div class="legend-item" onclick="openModalByName('사가')" style="--spot-color:#30B0C7;"><div class="legend-color"></div>사가</div>
+<div class="legend-item" onclick="openModalByName('유후인')" style="--spot-color:#007AFF;"><div class="legend-color"></div>유후인</div>
+<div class="legend-item" onclick="openModalByName('나가사키')" style="--spot-color:#5856D6;"><div class="legend-color"></div>나가사키</div>
+<div class="legend-item" onclick="openModalByName('구마모토')" style="--spot-color:#AF52DE;"><div class="legend-color"></div>구마모토</div>
+<div class="legend-item" onclick="openModalByName('가고시마')" style="--spot-color:#FF2D55;"><div class="legend-color"></div>가고시마</div>
+<div class="legend-item" onclick="openModalByName('미야코지마')" style="--spot-color:#A2845E;"><div class="legend-color"></div>미야코지마</div>
+</div>
+
+<section class="travel-info" aria-labelledby="travel-info-title">
+  <h1 id="travel-info-title">일본여행지도 – 도시별 여행 정보</h1>
+  <p>일본 여행을 준비할 때 방문하고 싶은 도시의 위치와 지역별 특징을 쉽게 살펴볼 수 있도록 만든 여행 지도입니다. 지도 위의 색상 표시 또는 아래 도시 이름을 선택하면 해당 지역의 사진과 영상, 간단한 소개를 확인할 수 있습니다.</p>
+
+  <h2>도시별 여행 정보 살펴보기</h2>
+  <p>현재 지도에서는 삿포로, 도쿄, 시즈오카, 오사카, 고베, 후쿠오카, 사가, 유후인, 나가사키, 구마모토, 가고시마, 미야코지마 등 일본의 여러 여행지를 소개합니다. 각 도시의 팝업에서 제공되는 사진과 영상으로 여행지의 분위기와 주요 볼거리를 미리 살펴보세요.</p>
+
+  <h2>이용 방법</h2>
+  <ul>
+    <li>지도 위의 도시 표시 또는 도시 목록을 선택합니다.</li>
+    <li>열리는 창에서 해당 도시의 사진과 영상을 확인합니다.</li>
+    <li>좌우 화살표로 등록된 미디어를 넘겨볼 수 있으며, 사진은 선택하여 크게 볼 수 있습니다.</li>
+  </ul>
+
+  <h2>정보 이용 안내</h2>
+  <p>이 사이트는 개인이 일본 여행을 기록하고 여행지 정보를 공유하기 위해 운영하는 참고용 페이지입니다. 사진·영상과 소개 내용은 개인 경험 및 수집한 자료를 바탕으로 구성되며, 교통편·영업시간·요금·시설 운영 여부 등은 변경될 수 있습니다. 실제 여행 전에는 해당 시설이나 공식 기관의 최신 안내를 확인하시기 바랍니다.</p>
+  <p>본 페이지의 정보는 여행 계획을 돕기 위한 참고 자료이며, 특정 상품이나 서비스의 구매 또는 방문을 보장하지 않습니다.</p>
+
+  <div class="privacy-note" id="privacy">
+    <h2>개인정보 및 쿠키 안내</h2>
+    <p>이 사이트는 방문자의 개인정보를 직접 입력받거나 회원가입을 제공하지 않습니다. 다만 사이트 운영 및 보안, 방문 통계 확인을 위해 호스팅·분석 서비스가 접속 정보를 처리할 수 있습니다.</p>
+    <p>Google AdSense 광고가 게재되는 경우 Google 및 그 파트너가 쿠키 또는 유사 기술을 사용하여 광고를 제공·측정할 수 있습니다. 광고 개인 최적화 및 쿠키 사용에 관한 자세한 사항은 <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Google 광고 정책</a>과 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google 개인정보처리방침</a>을 확인하시기 바랍니다.</p>
+    <p>이 안내는 현재 페이지의 기능을 기준으로 작성한 기본 안내입니다. 실제로 사용하는 분석·광고·외부 서비스와 수집 항목을 확인한 뒤 운영 방식에 맞게 보완해야 합니다.</p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div>일본여행지도 | 개인 여행 정보 페이지</div>
+  <div><a href="#travel-info-title">사이트 안내</a><a href="#privacy">개인정보 및 쿠키 안내</a></div>
+  <div>여행 정보는 방문 전 공식 안내를 통해 최신 내용을 확인해 주세요.</div>
+</footer>
+</div>
+
+<div class="modal-overlay" id="spotModal" onclick="closeModalOnOuterClick(event)">
+<div class="modal-card">
+<button class="modal-close" onclick="closeModal()">×</button>
+<div class="modal-media-container">
+<button class="slide-btn prev" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+<img class="modal-img" id="modalImg" src="" alt="도시 이미지" style="display:none;" onclick="openFullscreenMedia()">
+<video class="modal-video" id="modalVideo" controls muted loop playsinline style="display:none;" onclick="openFullscreenMedia()"></video>
+<div class="media-error" id="mediaError"><strong>미디어를 불러올 수 없습니다.</strong><span id="mediaErrorText"></span></div>
+<button class="slide-btn next" id="nextBtn" onclick="changeSlide(1)">❯</button>
+<div class="slide-counter" id="slideCounter">1 / 1</div>
+</div>
+
+<div class="modal-content">
+<div class="modal-title">
+<span class="modal-title-dot" id="modalDot"></span>
+<span id="modalName">도시 이름</span>
+</div>
+<p class="modal-desc" id="modalDesc"></p>
+<div class="modal-tags" id="modalTags"></div>
+</div>
+</div>
+</div>
+
+<div class="fullscreen-modal" id="fullscreenModal" onclick="closeFullscreenMediaOnOuterClick(event)">
+<button class="fullscreen-close" onclick="closeFullscreenMedia()">×</button>
+<img class="fullscreen-content" id="fullscreenImg" src="" alt="전체 화면 이미지" style="display:none;">
+<video class="fullscreen-content" id="fullscreenVideo" controls autoplay playsinline style="display:none;"></video>
+</div>
+
+<script>
+/* =========================기본 경로========================= */
+const IMG = "./images/";
+const VIDEO = "./videos/";
+
+/* =========================도시별 미디어========================= */
+const spotData = {
+"삿포로": {media: [{ type:"img", url:IMG+"sctc_airport.jpeg" },{ type:"img", url:IMG+"toya_lake.jpeg" },{ type:"img", url:IMG+"4season.jpeg" },{ type:"img", url:IMG+"lakeofblue.jpeg" },{ type:"img", url:IMG+"sbf.jpg" },{ type:"img", url:IMG+"withWife.jpg" },{ type:"img", url:IMG+"t4beer.jpeg" },{ type:"img", url:IMG+"3typeBeer.jpeg" },{ type:"img", url:IMG+"omakase0.jpeg" },/*{ type:"img", url:IMG+"curry_soup_7438.jpeg" },{ type:"img", url:IMG+"yakidori.jpeg" },*/{ type:"video", url:VIDEO+"sfox.mp4" }],desc:"홋카이도의 중심 도시로, 겨울 눈축제와 신선한 해산물, 삿포로 맥주로 유명합니다.",tags:["#삿포로맥주","#눈축제","#스스키노","#도야","#사계의언덕","#청의수","#꼬치구이"]},
+"도쿄": {media:[{type:"img",url:"https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=1200&auto=format&fit=crop"},{type:"img",url:IMG+"dentz.jpg"}],desc:"일본의 수도이자 전통과 첨단 문화가 공존하는 대도시입니다.",tags:["#도쿄타워","#시부야","#아사쿠사","#덴츠"]},
+"시즈오카": {media:[{ type:"img", url:IMG+"fuji.jpeg" },{ type:"img", url:IMG+"ryokan.jpeg" },{ type:"img", url:IMG+"rk_dinner.jpeg" },{ type:"img", url:IMG+"wasabi.jpeg" },{ type:"img", url:IMG+"nokcha.jpeg" }],desc:"웅장한 후지산의 절경을 한눈에 감상할 수 있는 고장입니다.",tags:["#후지산","#시즈오카녹차","#와사비"]},
+"오사카": {media:[{ type:"img", url:IMG+"osaka_castle.jpg" },{ type:"img", url:IMG+"osaka_dotonbori.jpg" },{ type:"img", url:IMG+"osaka_daegye.jpg" },{ type:"img", url:IMG+"osaka_okonomiaki.jpg" },{ type:"img", url:IMG+"kyuto_chunsusa.jpg" }],desc:"식도락의 천국! 도톤보리의 화려한 네온사인과 글리코상으로 유명합니다.",tags:["#도톤보리","#타코야키","#오사카성"]},
+"고베": {media:[{ type:"img", url:IMG+"kyobae_sheraton.jpg" },{ type:"img", url:IMG+"roko_island.jpg" },{ type:"img", url:IMG+"night.jpg" },{ type:"img", url:IMG+"daimaru.jpg" },{ type:"img", url:IMG+"pgm_grand.jpg" },{ type:"img", url:IMG+"pgm_grand_in.jpg" },{ type:"img", url:IMG+"Dec.jpg" },{ type:"img", url:IMG+"crepe.jpg" },{ type:"img", url:IMG+"kobae_stake.jpg" }],desc:"아름다운 항구 도시로 세계적으로 유명한 고베 규의 본고장입니다.",tags:["#고베규","#고베항","#야경","#크라페"]},
+"후쿠오카": {media:[{ type:"img", url:IMG+"fu_tower.jpg" },{ type:"img", url:IMG+"don.jpg" },{ type:"img", url:IMG+"jang.jpg" },{ type:"img", url:IMG+"myoug.jpg" },{ type:"img", url:IMG+"woni.jpg" },{ type:"img", url:IMG+"fu_dinner.jpg" },{ type:"img", url:IMG+"fu_dessert.jpg" },{ type:"img", url:IMG+"you_train.jpg" },{ type:"img", url:IMG+"haus_train.jpg" }],desc:"한국에서 가장 가까운 일본의 주요 도시 중 하나로, 나카스 포장마차 거리가 인기입니다.",tags:["#돈코츠라멘","#나카스포장마차"]},
+"사가": {media:[{ type:"img", url:IMG+"saga_airport.jpg" },{ type:"img", url:IMG+"saga_station.jpg" },{ type:"img", url:IMG+"saga_onchen.jpg" },{ type:"img", url:IMG+"saga_drug.jpg" },{ type:"img", url:IMG+"saga_cow.jpg" }],desc:"고즈넉한 온천 마을과 도자기 문화로 유명한 지역입니다.",tags:["#우레시노온천","#도자기","#사가규"]},
+"유후인": {media:[{ type:"img", url:IMG+"you.jpg" },{ type:"img", url:IMG+"gin.jpg" },{ type:"img", url:IMG+"you_shower.jpg" },{ type:"img", url:IMG+"you_go.jpg" }],desc:"큐슈를 대표하는 온천 휴양지. 안개가 피어오르는 긴린코 호수가 명소입니다.",tags:["#유후인온천","#긴린코호수","#료칸"]},
+"나가사키": {media:[{ type:"img", url:IMG+"naga_view.jpg" },{ type:"img", url:IMG+"na.jpg" },{ type:"img", url:IMG+"house_hotel.jpg" },{ type:"img", url:IMG+"house.jpg" }],desc:"17세기 네덜란드의 거리 풍경을 재현한 하우스텐보스 등이 유명합니다.",tags:["#하우스텐보스","#운하크루즈","#호텔오쿠라JR"]},
+"구마모토": {media:[{ type:"img", url:IMG+"ku_castle.jpg" },{ type:"img", url:IMG+"kumamon.jpg" },{ type:"img", url:IMG+"ku_gacha.jpg" },{ type:"img", url:IMG+"aso_view.jpg" },{ type:"img", url:IMG+"aso_pano.jpg" },{ type:"img", url:IMG+"aso_oz.jpg" },{ type:"img", url:IMG+"aso_green.jpg" },{ type:"img", url:IMG+"ku_sunset.jpg" },{ type:"img", url:IMG+"ku_don.jpg" },{ type:"img", url:IMG+"ku_lunch.jpg" },{ type:"img", url:IMG+"ku_dinner_pre.jpg" },{ type:"img", url:IMG+"ku_dinner.jpg" }],desc:"웅장한 구마모토성과 활화산 아소산의 자연경관을 품고 있습니다.",tags:["#구마모토성","#쿠마몬","#아소산"]},
+"가고시마": {media:[{ type:"img", url:IMG+"gago.jpg" },{ type:"img", url:IMG+"2man.jpg" },{ type:"img", url:IMG+"kago_dinner.jpg" },{ type:"img", url:IMG+"kago_din_1.jpg" },{ type:"img", url:IMG+"kago_din2.jpg" }],desc:"연기를 내뿜는 사쿠라지마 화산이 보이는 휴양지 느낌의 도시입니다.",tags:["#사쿠라지마","#흑돼지"]},
+"미야코지마": {media:[{ type:"video", url:VIDEO+"miya_hotel.mp4" },{ type:"img", url:IMG+"miya_view.jpg" },{ type:"img", url:IMG+"miya_sunset.jpg" },{ type:"img", url:IMG+"miya_ch.jpg" },{ type:"img", url:IMG+"miya_road4airplain.jpg" },{ type:"img", url:IMG+"miya_rammen.jpg" },{ type:"img", url:IMG+"miya_rammen1.jpg" }],desc:"오키나와 현의 에메랄드빛 바다를 자랑하는 환상의 섬입니다.",tags:["#미야코블루","#스노클링"]}
+};
+
+/* =========================변수========================= */
+const wrapper = document.getElementById("mapWrapper");
+const spots = document.querySelectorAll(".spot");
+let activeSpot = null;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let currentMediaList = [];
+let currentSlideIndex = 0;
+
+/* =========================이미지 프리로드(Preload) 최적화========================= */
+const preloadedCache = new Set();
+function preloadSingleImage(url) {
+  const cleanUrl = normalizeMediaUrl(url);
+  if (cleanUrl && !preloadedCache.has(cleanUrl)) {
+    const img = new Image();
+    img.src = cleanUrl;
+    preloadedCache.add(cleanUrl);
+  }
+}
+
+function preloadSpotMedia(mediaList) {
+  if (!mediaList || mediaList.length === 0) return;
+  mediaList.forEach(item => {
+    if (item.type === 'img') {
+      preloadSingleImage(item.url);
+    }
+  });
+}
+
+/* =========================URL 정리========================= */
+function normalizeMediaUrl(url) {
+  if (!url) return "";
+  return String(url).replace(/\\/g, "").trim();
+}
+
+/* =========================마커 이벤트========================= */
+spots.forEach(function(spot) {
+  spot.addEventListener("mousedown", startDrag);
+  spot.addEventListener("touchstart", startDrag, { passive: false });
+});
+
+function startDrag(e) {
+  activeSpot = this;
+  isDragging = false;
+  const point = e.touches ? e.touches[0] : e;
+  startX = point.clientX;
+  startY = point.clientY;
+  document.addEventListener("mousemove", drag);
+  document.addEventListener("touchmove", drag, { passive: false });
+  document.addEventListener("mouseup", stopDrag);
+  document.addEventListener("touchend", stopDrag);
+}
+
+function drag(e) {
+  if (!activeSpot) return;
+  const point = e.touches ? e.touches[0] : e;
+  const clientX = point.clientX;
+  const clientY = point.clientY;
+  if (Math.abs(clientX - startX) > 5 || Math.abs(clientY - startY) > 5) {
+    isDragging = true;
+  }
+  if (e.type === "touchmove") { e.preventDefault(); }
+  if (!isDragging) return;
+  const rect = wrapper.getBoundingClientRect();
+  let left = ((clientX - rect.left) / rect.width) * 100;
+  let top = ((clientY - rect.top) / rect.height) * 100;
+  left = Math.max(0, Math.min(100, left));
+  top = Math.max(0, Math.min(100, top));
+  activeSpot.style.left = left.toFixed(1) + "%";
+  activeSpot.style.top = top.toFixed(1) + "%";
+}
+
+function stopDrag() {
+  if (activeSpot && !isDragging) {
+    const name = activeSpot.getAttribute("data-name");
+    const color = activeSpot.style.getPropertyValue("--spot-color");
+    openModal(name, color);
+  }
+  activeSpot = null;
+  document.removeEventListener("mousemove", drag);
+  document.removeEventListener("touchmove", drag);
+  document.removeEventListener("mouseup", stopDrag);
+  document.removeEventListener("touchend", stopDrag);
+}
+
+/* =========================모달 열기========================= */
+function openModal(name, color) {
+  const data = spotData[name];
+  if (!data) { console.error("도시 데이터가 없습니다:", name); return; }
+  
+  currentMediaList = data.media || [];
+  currentSlideIndex = 0;
+
+  // 모달이 열릴 때 해당 도시의 모든 이미지 백그라운드 프리로드
+  preloadSpotMedia(currentMediaList);
+
+  document.getElementById("modalName").innerText = name;
+  document.getElementById("modalDesc").innerText = data.desc;
+  document.getElementById("modalDot").style.backgroundColor = color || "#2563eb";
+
+  /* 태그 설정 */
+  const tagsContainer = document.getElementById("modalTags");
+  tagsContainer.innerHTML = "";
+  data.tags.forEach(function(tag) {
+    const span = document.createElement("span");
+    span.className = "modal-tag";
+    span.innerText = tag;
+    tagsContainer.appendChild(span);
+  });
+
+  updateSlideDisplay();
+  document.getElementById("spotModal").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+/* =========================슬라이드 표시========================= */
+function updateSlideDisplay() {
+  const imgEl = document.getElementById("modalImg");
+  const videoEl = document.getElementById("modalVideo");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const counter = document.getElementById("slideCounter");
+  const errorEl = document.getElementById("mediaError");
+  const errorText = document.getElementById("mediaErrorText");
+
+  /* 초기화 */
+  videoEl.pause(); videoEl.removeAttribute("src"); videoEl.load();
+  imgEl.removeAttribute("src");
+  imgEl.style.display = "none"; videoEl.style.display = "none";
+  errorEl.style.display = "none";
+
+  if (currentMediaList.length === 0) {
+    counter.style.display = "none"; prevBtn.style.display = "none"; nextBtn.style.display = "none";
+    errorEl.style.display = "block"; errorText.innerText = "등록된 사진 또는 동영상이 없습니다.";
+    return;
+  }
+
+  const currentItem = currentMediaList[currentSlideIndex];
+  const mediaUrl = normalizeMediaUrl(currentItem.url);
+
+  /* 동영상 */
+  if (currentItem.type === "video") {
+    videoEl.style.display = "block";
+    videoEl.src = mediaUrl;
+    videoEl.load();
+    videoEl.play().catch(function() { console.log("자동 재생이 제한되었습니다."); });
+    videoEl.onerror = function() {
+      videoEl.style.display = "none";
+      errorEl.style.display = "block";
+      errorText.innerText = mediaUrl;
+    };
+  }
+  /* 이미지 */
+  else {
+    imgEl.style.display = "block";
+    imgEl.src = mediaUrl;
+    imgEl.alt = "도시 이미지";
+    imgEl.onload = function() { errorEl.style.display = "none"; };
+    imgEl.onerror = function() {
+      imgEl.style.display = "none";
+      errorEl.style.display = "block";
+      errorText.innerText = mediaUrl;
+    };
+  }
+
+  /* 슬라이드 버튼 및 카운터 설정 */
+  if (currentMediaList.length > 1) {
+    prevBtn.style.display = "flex";
+    nextBtn.style.display = "flex";
+    counter.style.display = "block";
+    counter.innerText = (currentSlideIndex + 1) + " / " + currentMediaList.length;
+  } else {
+    prevBtn.style.display = "none";
+    nextBtn.style.display = "none";
+    counter.style.display = "none";
+  }
+}
+
+/* =========================슬라이드 이동========================= */
+function changeSlide(direction) {
+  if (currentMediaList.length <= 1) return;
+  currentSlideIndex += direction;
+
+  if (currentSlideIndex < 0) {
+    currentSlideIndex = currentMediaList.length - 1;
+  } else if (currentSlideIndex >= currentMediaList.length) {
+    currentSlideIndex = 0;
+  }
+
+  updateSlideDisplay();
+}
+
+/* =========================범례 클릭 처리========================= */
+function openModalByName(name) {
+  const spotEl = document.querySelector('.spot[data-name="' + name + '"]');
+  const color = spotEl ? spotEl.style.getPropertyValue("--spot-color") : "#2563eb";
+  openModal(name, color);
+}
+
+/* =========================모달 닫기========================= */
+function closeModal() {
+  const videoEl = document.getElementById("modalVideo");
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.removeAttribute("src");
+    videoEl.load();
+  }
+  document.getElementById("spotModal").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+function closeModalOnOuterClick(e) {
+  if (e.target.classList.contains("modal-overlay")) { closeModal(); }
+}
+
+/* =========================전체화면========================= */
+function openFullscreenMedia() {
+  if (currentMediaList.length === 0) return;
+  const currentItem = currentMediaList[currentSlideIndex];
+  const mediaUrl = normalizeMediaUrl(currentItem.url);
+  const fsModal = document.getElementById("fullscreenModal");
+  const fsImg = document.getElementById("fullscreenImg");
+  const fsVideo = document.getElementById("fullscreenVideo");
+
+  fsImg.style.display = "none";
+  fsVideo.style.display = "none";
+
+  if (currentItem.type === "video") {
+    fsVideo.style.display = "block";
+    fsVideo.src = mediaUrl;
+    fsVideo.load();
+    fsVideo.play().catch(function(){});
+  } else {
+    fsVideo.pause();
+    fsImg.style.display = "block";
+    fsImg.src = mediaUrl;
+  }
+
+  fsModal.classList.add("active");
+}
+
+function closeFullscreenMedia() {
+  const fsModal = document.getElementById("fullscreenModal");
+  const fsVideo = document.getElementById("fullscreenVideo");
+  if (fsVideo) { fsVideo.pause(); fsVideo.removeAttribute("src"); fsVideo.load(); }
+  fsModal.classList.remove("active");
+}
+
+function closeFullscreenMediaOnOuterClick(e) {
+  if (e.target.classList.contains("fullscreen-modal")) { closeFullscreenMedia(); }
+}
+
+/* =========================키보드 네비게이션========================= */
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    closeFullscreenMedia();
+    closeModal();
+  }
+  if (e.key === "ArrowRight") {
+    if (document.getElementById("spotModal").classList.contains("active")) { changeSlide(1); }
+  }
+  if (e.key === "ArrowLeft") {
+    if (document.getElementById("spotModal").classList.contains("active")) { changeSlide(-1); }
+  }
+});
+
+/* =========================지도 이미지 로드 확인========================= */
+document.querySelector(".map-image").addEventListener("error", function() {
+  this.style.display = "none";
+  wrapper.style.background = "#1e293b";
+  const message = document.createElement("div");
+  message.style.position = "absolute";
+  message.style.inset = "0";
+  message.style.display = "flex";
+  message.style.alignItems = "center";
+  message.style.justifyContent = "center";
+  message.style.color = "#fbbf24";
+  message.style.fontSize = "16px";
+  message.style.fontWeight = "700";
+  message.innerText = "japan_map.jpg 파일을 찾을 수 없습니다.";
+  wrapper.appendChild(message);
+});
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"99cdbb1f1f0047bcbc4e755a963f9c72","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>
